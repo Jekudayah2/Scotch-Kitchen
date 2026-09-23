@@ -320,6 +320,7 @@
   --animate-sheet-up: sheet-up 340ms var(--ease-out-soft) both;
   --animate-bump: bump 420ms var(--ease-out-soft);
   --animate-tick: tick 240ms var(--ease-out-soft);
+  --animate-route-progress: route-progress 2.4s var(--ease-out-soft) forwards;
 
   @keyframes fade-in {
     from {
@@ -363,6 +364,14 @@
     to {
       transform: translateY(0);
       opacity: 1;
+    }
+  }
+  @keyframes route-progress {
+    from {
+      transform: scaleX(0.05);
+    }
+    to {
+      transform: scaleX(0.85);
     }
   }
   @keyframes bump {

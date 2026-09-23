@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmDialog } from '@/components/ui/dialog'
-import { EmptyState, ErrorState, Notice, PageLoader } from '@/components/ui/feedback'
+import { EmptyState, ErrorState, Notice, Skeleton } from '@/components/ui/feedback'
 import { Field, Textarea } from '@/components/ui/field'
 import { cancelMyOrder, fetchOrderByReference, orderKeys } from '@/features/orders/api'
 import {
@@ -65,7 +65,21 @@ export default function OrderDetailPage() {
     onError: (error) => toast.error(friendlyError(error)),
   })
 
-  if (order.isPending) return <PageLoader label="Loading your order" />
+  if (order.isPending) {
+    return (
+      <div className="container-page py-10 lg:py-14" aria-busy="true" aria-label="Loading your order">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="mt-6 h-10 w-56" />
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+          <Skeleton className="h-[26rem] rounded-card" />
+          <div className="space-y-6">
+            <Skeleton className="h-60 rounded-card" />
+            <Skeleton className="h-72 rounded-card" />
+          </div>
+        </div>
+      </div>
+    )
+  }
   if (order.isError) return <ErrorState className="min-h-[60vh]" error={order.error} onRetry={() => void order.refetch()} />
   if (!data) {
     return (
@@ -115,7 +129,8 @@ export default function OrderDetailPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <OrderStatusBadge status={data.order_status} />
-          <PaymentStatusBadge status={data.payment_status} />
+          {/* Once paid, the order status already says so; show payment only when it needs attention. */}
+          {data.payment_status !== 'PAID' && <PaymentStatusBadge status={data.payment_status} />}
         </div>
       </header>
 

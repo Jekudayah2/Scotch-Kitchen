@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { createBrowserRouter, Outlet, ScrollRestoration } from 'react-router'
 import { PageLoader } from '@/components/ui/feedback'
+import { RouteProgress } from '@/components/ui/route-progress'
 import { RequireAuth } from '@/features/auth/guards'
 import { AuthLayout } from '@/layouts/auth-layout'
 import { PublicLayout } from '@/layouts/public/public-layout'
@@ -13,6 +14,7 @@ function RootShell() {
   return (
     <>
       <ScrollRestoration />
+      <RouteProgress />
       <Outlet />
     </>
   )

@@ -37,6 +37,9 @@ export function LocationPicker({ state, dispatch, savedLocations, bounds, classN
   const [searchError, setSearchError] = useState<string | null>(null)
   const [focus, setFocus] = useState<{ point: LatLng; zoom?: number; key: number } | null>(null)
   const [lookingUp, setLookingUp] = useState(false)
+  const [method, setMethod] = useState<'gps' | 'search' | 'map' | null>(null)
+  const searchInput = useRef<HTMLInputElement>(null)
+  const mapArea = useRef<HTMLDivElement>(null)
   const focusCounter = useRef(0)
   const temporary = state.temporary
   const confirmed = state.confirmed
@@ -119,41 +122,72 @@ export function LocationPicker({ state, dispatch, savedLocations, bounds, classN
 
   return (
     <div className={cn('space-y-4', className)}>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button
-          variant="secondary"
-          size="lg"
-          onClick={() => void locateMe()}
-          loading={gps.status === 'locating'}
-          leadingIcon={<Crosshair aria-hidden="true" />}
-          className="shrink-0"
-        >
-          Use my location
-        </Button>
-        <form onSubmit={(e) => void handleSearch(e)} className="flex flex-1 gap-2" role="search">
+      {/* Three ways to choose a spot. GPS is optional; search and map work without it. */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3" role="group" aria-label="How do you want to choose your location?">
+        {(
+          [
+            { id: 'gps', icon: Crosshair, label: 'Use my location', hint: 'Best outdoors' },
+            { id: 'search', icon: Search, label: 'Search a place', hint: 'Street or landmark' },
+            { id: 'map', icon: MousePointerClick, label: 'Pick on map', hint: 'Tap your spot' },
+          ] as const
+        ).map(({ id, icon: Icon, label, hint }) => {
+          const active = method === id
+          const busy = id === 'gps' && gps.status === 'locating'
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => {
+                setMethod(id)
+                if (id === 'gps') void locateMe()
+                if (id === 'search') queueMicrotask(() => searchInput.current?.focus())
+                if (id === 'map') mapArea.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }}
+              className={cn(
+                'flex min-h-24 flex-col items-start justify-between gap-2 rounded-[1rem] border-2 p-3 text-left transition-[border-color,background-color,transform] duration-200 sm:p-4',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.98] motion-reduce:active:scale-100',
+                active ? 'border-primary bg-primary-soft' : 'border-line bg-surface hover:border-line-strong',
+              )}
+            >
+              <span className={cn('grid size-9 place-items-center rounded-[0.7rem]', active ? 'bg-primary text-primary-ink' : 'bg-surface-2 text-ink-2')}>
+                {busy ? <LoaderCircle className="size-4.5 animate-spin" aria-hidden="true" /> : <Icon className="size-4.5" aria-hidden="true" />}
+              </span>
+              <span>
+                <span className={cn('block text-sm leading-tight font-bold', active ? 'text-primary-text' : 'text-ink')}>{label}</span>
+                <span className="hidden text-xs text-ink-3 sm:block">{hint}</span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {method === 'search' && (
+        <form onSubmit={(e) => void handleSearch(e)} className="flex gap-2" role="search">
           <label htmlFor="location-search" className="sr-only">
             Search for a place, street or landmark
           </label>
           <Input
+            ref={searchInput}
             id="location-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search a place, street or landmark"
+            placeholder="e.g. Unity Hall KNUST"
             className="h-12"
             autoComplete="off"
             enterKeyHint="search"
           />
-          <Button type="submit" size="lg" variant="secondary" loading={searching} aria-label="Search" className="px-4">
+          <Button type="submit" size="lg" loading={searching} aria-label="Search" className="px-4">
             <Search aria-hidden="true" />
           </Button>
         </form>
-      </div>
+      )}
 
       {gps.status === 'error' && <Notice tone="warning">{gps.message}</Notice>}
       {searchError && <Notice tone="neutral">{searchError}</Notice>}
 
       {results && results.length > 0 && (
-        <ul className="max-h-60 divide-y divide-line overflow-y-auto rounded-2xl border border-line bg-surface" aria-label="Search results">
+        <ul className="max-h-60 divide-y divide-line overflow-y-auto rounded-[1rem] border border-line bg-surface" aria-label="Search results">
           {results.map((place) => (
             <li key={place.id}>
               <button
@@ -196,7 +230,7 @@ export function LocationPicker({ state, dispatch, savedLocations, bounds, classN
         </div>
       )}
 
-      <div className="relative">
+      <div ref={mapArea} className="relative scroll-mt-24">
         <LazyMap
           className="h-[20rem] w-full ring-1 ring-line sm:h-[24rem]"
           ariaLabel="Delivery map. Tap to drop a pin."
@@ -206,7 +240,12 @@ export function LocationPicker({ state, dispatch, savedLocations, bounds, classN
           focus={focus}
           onMapClick={(position) => dispatch({ type: 'propose', point: blankPoint(position, 'MAP') })}
         />
-        <p className="glass pointer-events-none absolute top-3 left-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold text-ink shadow-soft">
+        <p
+          className={cn(
+            'glass pointer-events-none absolute top-3 left-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold text-ink shadow-soft',
+            method === 'map' && 'ring-2 ring-primary',
+          )}
+        >
           <MousePointerClick className="size-3.5" aria-hidden="true" />
           Tap the map to drop a pin
         </p>
@@ -215,7 +254,7 @@ export function LocationPicker({ state, dispatch, savedLocations, bounds, classN
       {temporary ? (
         <section
           aria-labelledby="confirm-location-title"
-          className="space-y-4 rounded-3xl border-2 border-brand bg-brand-soft/40 p-5 dark:bg-brand-soft"
+          className="space-y-4 rounded-card border-2 border-brand bg-brand-soft/40 p-5 dark:bg-brand-soft"
         >
           <div className="flex items-start justify-between gap-3">
             <h3 id="confirm-location-title" className="font-display text-lg font-bold text-ink">
@@ -269,8 +308,8 @@ export function LocationPicker({ state, dispatch, savedLocations, bounds, classN
           </div>
         </section>
       ) : confirmed ? (
-        <section aria-label="Confirmed delivery location" className="flex gap-4 rounded-3xl border border-line bg-surface p-5 shadow-soft">
-          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-success-soft text-success-text">
+        <section aria-label="Confirmed delivery location" className="flex gap-4 rounded-card border border-line bg-surface p-5 shadow-soft">
+          <span className="grid size-11 shrink-0 place-items-center rounded-control bg-success-soft text-success-text">
             <CheckCircle2 className="size-6" aria-hidden="true" />
           </span>
           <div className="min-w-0 space-y-1">

@@ -1,11 +1,16 @@
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { CartDrawer, FloatingOrderSummary } from '@/features/cart/cart-ui'
 import { AnnouncementBar } from '@/features/storefront/announcement-bar'
+import { cn } from '@/utils/cn'
+import { FocusFooter, FocusHeader } from './focus-chrome'
 import { MobileBottomNav } from './mobile-bottom-nav'
+import { FOCUS_ROUTES } from './nav-items'
 import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 
 export function PublicLayout() {
+  const { pathname } = useLocation()
+  const focused = FOCUS_ROUTES.some((route) => pathname.startsWith(route))
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -14,12 +19,12 @@ export function PublicLayout() {
       >
         Skip to content
       </a>
-      <AnnouncementBar />
-      <SiteHeader />
-      <main id="main" className="flex-1 pb-28 lg:pb-0">
+      {!focused && <AnnouncementBar />}
+      {focused ? <FocusHeader /> : <SiteHeader />}
+      <main id="main" className={cn('flex-1', !focused && 'pb-28 lg:pb-0')}>
         <Outlet />
       </main>
-      <SiteFooter />
+      {focused ? <FocusFooter /> : <SiteFooter />}
       <MobileBottomNav />
       <FloatingOrderSummary />
       <CartDrawer />
