@@ -217,6 +217,13 @@
   --logo-gold-3: #b48e4b;
 }
 
+/* A light surface inside dark UI (e.g. the cream seal): keep the deeper gold. */
+.logo-on-light {
+  --logo-gold-1: #b08a4a;
+  --logo-gold-2: #94703a;
+  --logo-gold-3: #77571f;
+}
+
 /* Creamypop: soft cream and strawberry in light mode, warm cocoa at night. */
 [data-scene='cream'] {
   --canvas: var(--scene-cream);
@@ -518,7 +525,7 @@
   font-family: var(--font-display);
   font-weight: 800;
   font-stretch: 75%;
-  font-size: clamp(5.25rem, 3rem + 8vw, 10.5rem);
+  font-size: clamp(4.5rem, 2.2rem + 9vw, 10.5rem);
   line-height: 0.84;
   letter-spacing: -0.012em;
   text-transform: uppercase;

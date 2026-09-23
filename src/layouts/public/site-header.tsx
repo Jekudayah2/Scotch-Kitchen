@@ -42,13 +42,13 @@ export function SiteHeader() {
         scrolled ? 'glass-bar shadow-[0_1px_0_var(--line),0_14px_30px_-26px_rgb(var(--shadow-rgb)/0.5)]' : scene ? 'bg-canvas' : 'bg-transparent',
       )}
     >
-      <div className={cn('container-page flex items-center gap-4 transition-[height] duration-300', scrolled ? 'h-16' : 'h-[4.5rem] lg:h-20')}>
+      <div className={cn('container-page flex items-center gap-4 transition-[height] duration-300', scrolled ? 'h-14 sm:h-16' : 'h-16 lg:h-20')}>
         <Link
           to="/"
           className="shrink-0 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
           aria-label="SCOTCH’s Kitchen home"
         >
-          <KitchenLogo className={cn('transition-[height] duration-300', scrolled ? 'h-9' : 'h-10 lg:h-12')} />
+          <KitchenLogo className={cn('transition-[height] duration-300', scrolled ? 'h-8 sm:h-9' : 'h-9 lg:h-12')} />
         </Link>
 
         <nav aria-label="Primary" className="ml-4 hidden lg:block xl:ml-10">
