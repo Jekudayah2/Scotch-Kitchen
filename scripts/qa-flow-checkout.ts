@@ -89,6 +89,8 @@ await page.waitForTimeout(300)
 await shot('2_delivery_proposed')
 await page.getByRole('button', { name: 'Confirm This Location' }).click()
 await page.getByText('Delivery location confirmed').waitFor()
+await page.getByLabel('Save this location for next time').click()
+await page.getByLabel('Label').selectOption('Hostel')
 await shot('2_delivery_confirmed')
 await page.getByRole('button', { name: 'Review Order' }).last().click()
 
@@ -132,6 +134,24 @@ await page.waitForURL(/\/track-order\/SK-/)
 await ready()
 await page.waitForTimeout(1500)
 await shot('6_tracking')
+
+// The customer's own space.
+for (const [path, name] of [
+  ['/account', '7_account'],
+  ['/account/orders', '8_account_orders'],
+  ['/account/locations', '9_account_places'],
+  ['/account/notifications', '10_account_notifications'],
+] as const) {
+  await page.getByRole('link', { name: /My Account|Overview|Orders|Saved places|Notifications/ }).first().waitFor({ timeout: 5_000 }).catch(() => undefined)
+  await page.evaluate((to) => {
+    window.history.pushState({}, '', to)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }, path)
+  await page.waitForTimeout(1500)
+  await shot(name)
+}
+const accountText = await page.locator('main').innerText()
+check('account pages render for the signed-in customer', accountText.includes('My SCOTCH’s Kitchen'))
 
 console.log(errors.length ? `\nConsole errors:\n - ${errors.join('\n - ')}` : '\nNo console errors.')
 await context.close()

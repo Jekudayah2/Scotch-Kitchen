@@ -1,4 +1,4 @@
-import { Bike, ChevronDown, LayoutDashboard, LogOut, MapPinned, Package, UserRound } from 'lucide-react'
+import { Bell, Bike, ChevronDown, LayoutDashboard, LogOut, MapPin, MapPinned, Package, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Avatar } from '@/components/ui/avatar'
@@ -61,6 +61,12 @@ export function AccountMenu() {
         </MenuItem>
         <MenuItem icon={<Package />} onSelect={() => navigate('/account/orders')}>
           My Orders
+        </MenuItem>
+        <MenuItem icon={<MapPin />} onSelect={() => navigate('/account/locations')}>
+          Saved Places
+        </MenuItem>
+        <MenuItem icon={<Bell />} onSelect={() => navigate('/account/notifications')}>
+          Notifications
         </MenuItem>
         <MenuItem icon={<MapPinned />} onSelect={() => navigate('/track-order')}>
           Track Order

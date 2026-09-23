@@ -3,6 +3,7 @@ import { createBrowserRouter, Outlet, ScrollRestoration } from 'react-router'
 import { PageLoader } from '@/components/ui/feedback'
 import { RouteProgress } from '@/components/ui/route-progress'
 import { RequireAuth } from '@/features/auth/guards'
+import { AccountLayout } from '@/layouts/account-layout'
 import { AuthLayout } from '@/layouts/auth-layout'
 import { PublicLayout } from '@/layouts/public/public-layout'
 import { NotFoundPage, RouteErrorPage } from '@/pages/system-pages'
@@ -47,6 +48,16 @@ export const router = createBrowserRouter([
               { path: 'checkout', lazy: page(() => import('@/pages/checkout/checkout-page')) },
               { path: 'checkout/callback', lazy: page(() => import('@/pages/checkout/payment-callback-page')) },
               { path: 'track-order/:reference', lazy: page(() => import('@/pages/orders/order-detail-page')) },
+              {
+                path: 'account',
+                element: <AccountLayout />,
+                children: [
+                  { index: true, lazy: page(() => import('@/pages/account/account-home-page')) },
+                  { path: 'orders', lazy: page(() => import('@/pages/account/account-orders-page')) },
+                  { path: 'locations', lazy: page(() => import('@/pages/account/saved-locations-page')) },
+                  { path: 'notifications', lazy: page(() => import('@/pages/account/notifications-page')) },
+                ],
+              },
             ],
           },
           { path: '*', element: <NotFoundPage /> },
