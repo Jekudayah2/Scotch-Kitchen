@@ -1229,6 +1229,18 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_team_list: {
+        Row: {
+          user_id: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          created_at: string | null
+          granted_by: string | null
+          full_name: string | null
+          email: string | null
+          phone: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       account_summary: {

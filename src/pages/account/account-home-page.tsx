@@ -55,7 +55,7 @@ export default function AccountHomePage() {
   const recent = (orders.data ?? []).filter((o) => !isActiveOrder(o)).slice(0, 3)
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[20rem_1fr] lg:items-start lg:gap-10">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[20rem_1fr] lg:items-start lg:gap-10">
       <aside className="space-y-5 lg:sticky lg:top-24">
         <div className="rounded-card border border-line bg-surface p-5 shadow-soft sm:p-6">
           <div className="flex items-center gap-4">

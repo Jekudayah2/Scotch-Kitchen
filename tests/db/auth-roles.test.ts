@@ -197,3 +197,27 @@ describe('audit log integrity', () => {
     expect(out.r).toEqual({ reference: 'abc', nested: { access_code: '[REDACTED]', api_key: '[REDACTED]' }, password: '[REDACTED]' })
   })
 })
+
+describe('admin team view (RLS through security_invoker)', () => {
+  it('shows admins every staff role, and anyone else only their own', async () => {
+    const admin = await t.createUser(`team-admin-${Date.now()}@example.com`, { full_name: 'Team Admin' })
+    await t.grantRole(admin, 'ADMIN')
+    const rider = await t.createUser(`team-rider-${Date.now()}@example.com`, { full_name: 'Team Rider' })
+    await t.grantRole(rider, 'RIDER')
+    const customer = await t.createUser(`team-customer-${Date.now()}@example.com`, { full_name: 'Just A Customer' })
+
+    const asAdmin = await t.as('authenticated', admin, () =>
+      t.query<{ user_id: string; role: string }>('select user_id, role from public.admin_team_list'),
+    )
+    expect(asAdmin).toEqual(expect.arrayContaining([{ user_id: admin, role: 'ADMIN' }, { user_id: rider, role: 'RIDER' }]))
+    expect(asAdmin.some((r) => r.user_id === customer)).toBe(false)
+
+    const asRider = await t.as('authenticated', rider, () => t.query<{ user_id: string }>('select user_id from public.admin_team_list'))
+    expect(asRider.map((r) => r.user_id)).toEqual([rider])
+
+    const asCustomer = await t.as('authenticated', customer, () => t.query('select 1 from public.admin_team_list'))
+    expect(asCustomer).toEqual([])
+
+    expect(await errorOf(t.as('anon', null, () => t.query('select 1 from public.admin_team_list')))).toMatch(/permission denied/)
+  })
+})

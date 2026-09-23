@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { createBrowserRouter, Outlet, ScrollRestoration } from 'react-router'
 import { PageLoader } from '@/components/ui/feedback'
 import { RouteProgress } from '@/components/ui/route-progress'
-import { RequireAuth } from '@/features/auth/guards'
+import { RequireAuth, RequireRole } from '@/features/auth/guards'
 import { AccountLayout } from '@/layouts/account-layout'
 import { AuthLayout } from '@/layouts/auth-layout'
 import { PublicLayout } from '@/layouts/public/public-layout'
@@ -61,6 +61,33 @@ export const router = createBrowserRouter([
             ],
           },
           { path: '*', element: <NotFoundPage /> },
+        ],
+      },
+      // Operations HQ: its own shell, code-split so customers never download it.
+      {
+        path: 'admin',
+        errorElement: <RouteErrorPage />,
+        element: (
+          <RequireRole role="ADMIN">
+            <Outlet />
+          </RequireRole>
+        ),
+        children: [
+          {
+            lazy: async () => ({ Component: (await import('@/layouts/admin/admin-layout')).AdminLayout }),
+            children: [
+              { index: true, lazy: page(() => import('@/pages/admin/overview-page')) },
+              { path: 'orders', lazy: page(() => import('@/pages/admin/orders-page')) },
+              { path: 'deliveries', lazy: page(() => import('@/pages/admin/deliveries-page')) },
+              { path: 'products', lazy: page(() => import('@/pages/admin/products-page')) },
+              { path: 'customers', lazy: page(() => import('@/pages/admin/customers-page')) },
+              { path: 'riders', lazy: page(() => import('@/pages/admin/riders-page')) },
+              { path: 'payments', lazy: page(() => import('@/pages/admin/payments-page')) },
+              { path: 'analytics', lazy: page(() => import('@/pages/admin/analytics-page')) },
+              { path: 'settings', lazy: page(() => import('@/pages/admin/settings-page')) },
+              { path: '*', element: <NotFoundPage /> },
+            ],
+          },
         ],
       },
       // Development-only Paystack stand-in for the QA preview (removed from production builds).

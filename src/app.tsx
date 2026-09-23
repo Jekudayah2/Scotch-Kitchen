@@ -6,16 +6,19 @@ import { isSupabaseConfigured } from '@/config/env'
 import { AuthProvider } from '@/features/auth/auth-provider'
 import { CartProvider } from '@/features/cart/cart-provider'
 import { ThemeProvider, useTheme } from '@/features/theme/theme-provider'
+import { useMediaQuery } from '@/hooks/use-media'
 import { queryClient } from '@/lib/query-client'
 import { SetupRequiredPage } from '@/pages/system-pages'
 import { router } from '@/router'
 
 function ThemedToaster() {
   const { resolved } = useTheme()
+  // Phones: top, clear of the bottom navigation. Desktop: bottom-right, clear of drawer headers.
+  const desktop = useMediaQuery('(min-width: 1024px)')
   return (
     <Toaster
       theme={resolved}
-      position="top-center"
+      position={desktop ? 'bottom-right' : 'top-center'}
       richColors
       closeButton
       toastOptions={{ classNames: { toast: 'font-sans rounded-2xl' } }}
