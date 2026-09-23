@@ -96,6 +96,22 @@ for (const [path, name] of [
   await shot(name)
 }
 
+// Data management: archive everything with the typed confirmation. Nothing is deleted.
+await go(page, '/admin/settings?tab=data')
+await page.getByRole('button', { name: 'Reset orders' }).click()
+const confirm = page.getByRole('dialog')
+check('archive stays locked until RESET ORDERS is typed', await confirm.getByRole('button', { name: 'Archive orders' }).isDisabled())
+await confirm.getByLabel('Reason').fill('QA run')
+await confirm.getByLabel('Type RESET ORDERS to confirm').fill('RESET ORDERS')
+await confirm.getByRole('button', { name: 'Archive orders' }).click()
+await page.waitForTimeout(1500)
+const [archived] = await sql<{ open: number; kept: number }>(
+  page,
+  'select count(*) filter (where archived_at is null)::int as open, count(*)::int as kept from public.orders',
+)
+check(`orders archived, none deleted (${archived?.kept ?? 0} kept)`, archived?.open === 0 && (archived?.kept ?? 0) > 0)
+await shot('14_after_reset')
+
 // Non-admins are turned away by the guard (and by RLS underneath).
 await signOut(page)
 await signIn(page, 'customer@qa.local', '/admin')

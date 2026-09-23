@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createTestDb, errorOf, type TestDb } from './harness.ts'
+import { ORDER_TRANSITIONS } from '../../src/features/orders/transitions.ts'
 import { createOrder, createPaidOrder, createStaff, orderRow, rpcAs } from './fixtures.ts'
 
 let t: TestDb
@@ -51,6 +52,9 @@ describe('status machine', () => {
       ].sort(),
     )
     expect(statuses).toHaveLength(8)
+    // The UI's copy (which decides what buttons to show) must match the database exactly.
+    const ui = Object.entries(ORDER_TRANSITIONS).flatMap(([from, tos]) => tos.map((to) => `${from}>${to}`))
+    expect(ui.sort()).toEqual(allowed.map((r) => `${r.f}>${r.t}`).sort())
   })
 
   it('blocks jumps such as PENDING → DELIVERED and admin-forced payment states', async () => {

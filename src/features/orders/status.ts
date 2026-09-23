@@ -11,26 +11,13 @@ import {
 } from 'lucide-react'
 import type { BadgeTone } from '@/components/ui/badge'
 import type { Order, OrderEvent, OrderStatus, PaymentStatus } from '@/types/domain'
+import { ORDER_TRANSITIONS } from './transitions'
 
 export const ORDER_STATUSES: OrderStatus[] = ['PENDING', 'PAID', 'PREPARING', 'READY', 'ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED']
 
 export const ACTIVE_STATUSES: OrderStatus[] = ['PENDING', 'PAID', 'PREPARING', 'READY', 'ASSIGNED', 'OUT_FOR_DELIVERY']
 
-/**
- * Mirror of private.is_valid_transition() in the database. The database is the
- * authority; this copy only decides which buttons to show. A test asserts both
- * lists are identical.
- */
-export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  PENDING: ['PAID', 'CANCELLED'],
-  PAID: ['PREPARING', 'CANCELLED'],
-  PREPARING: ['READY', 'ASSIGNED', 'CANCELLED'],
-  READY: ['ASSIGNED', 'CANCELLED'],
-  ASSIGNED: ['READY', 'OUT_FOR_DELIVERY', 'CANCELLED'],
-  OUT_FOR_DELIVERY: ['DELIVERED', 'CANCELLED'],
-  DELIVERED: [],
-  CANCELLED: [],
-}
+export { ORDER_TRANSITIONS }
 
 export function canTransition(from: OrderStatus, to: OrderStatus) {
   return ORDER_TRANSITIONS[from].includes(to)

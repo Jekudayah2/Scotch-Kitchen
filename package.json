@@ -20,6 +20,12 @@
     "test:db": "vitest run --project db",
     "test:unit": "vitest run --project unit",
     "db:types": "node scripts/generate-db-types.ts",
+    "qa:shots": "node scripts/qa-screenshots.ts",
+    "qa:cart": "node scripts/qa-flow-cart.ts",
+    "qa:checkout": "node scripts/qa-flow-checkout.ts",
+    "qa:admin": "node scripts/qa-flow-admin.ts",
+    "qa:rider": "node scripts/qa-flow-rider.ts",
+    "brand:logo": "node scripts/build-logo.ts && node scripts/rasterize-icons.ts",
     "verify": "npm run typecheck && npm run typecheck:functions && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
