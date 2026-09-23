@@ -308,7 +308,7 @@ export type Database = {
           image_url: string | null
           unit_price_pesewas: number
           quantity: number
-          line_total_pesewas: number | null
+          line_total_pesewas: number
           created_at: string
         }
         Insert: {
@@ -437,7 +437,7 @@ export type Database = {
           subtotal_pesewas: number
           delivery_fee_pesewas: number
           delivery_fee_status: string
-          total_pesewas: number | null
+          total_pesewas: number
           delivery_balance_pesewas: number
           delivery_balance_collected_at: string | null
           amount_paid_pesewas: number

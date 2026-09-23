@@ -39,7 +39,7 @@ create table public.orders (
   subtotal_pesewas integer not null check (subtotal_pesewas > 0),
   delivery_fee_pesewas integer not null default 0 check (delivery_fee_pesewas between 0 and 1000000),
   delivery_fee_status text not null default 'SET' check (delivery_fee_status in ('SET', 'QUOTE_PENDING')),
-  total_pesewas integer generated always as (subtotal_pesewas + delivery_fee_pesewas) stored,
+  total_pesewas integer not null generated always as (subtotal_pesewas + delivery_fee_pesewas) stored,
   -- Extra delivery money agreed AFTER a completed payment. The paid amount is never rewritten.
   delivery_balance_pesewas integer not null default 0 check (delivery_balance_pesewas between 0 and 1000000),
   delivery_balance_collected_at timestamptz,
@@ -129,7 +129,7 @@ create table public.order_items (
   image_url text,
   unit_price_pesewas integer not null check (unit_price_pesewas > 0),
   quantity integer not null check (quantity between 1 and 500),
-  line_total_pesewas integer generated always as (unit_price_pesewas * quantity) stored,
+  line_total_pesewas integer not null generated always as (unit_price_pesewas * quantity) stored,
   created_at timestamptz not null default now()
 );
 create index order_items_order_idx on public.order_items (order_id);

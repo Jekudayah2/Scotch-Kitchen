@@ -13,15 +13,14 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
-    "typecheck:functions": "deno check --config supabase/functions/deno.json supabase/functions/*/index.ts",
+    "typecheck:functions": "deno check --config supabase/functions/deno.json supabase/functions/paystack-initialize/index.ts supabase/functions/paystack-verify/index.ts supabase/functions/paystack-webhook/index.ts",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:db": "vitest run --project db",
     "test:unit": "vitest run --project unit",
-    "test:functions": "deno test --config supabase/functions/deno.json --allow-env supabase/functions/",
     "db:types": "node scripts/generate-db-types.ts",
-    "verify": "npm run typecheck && npm run lint && npm run test && npm run build"
+    "verify": "npm run typecheck && npm run typecheck:functions && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",

@@ -34,13 +34,18 @@ export const router = createBrowserRouter([
           { path: 'brands/:slug', lazy: page(() => import('@/pages/public/brand-page')) },
           { path: 'order', lazy: page(() => import('@/pages/public/order-page')) },
           { path: 'cart', lazy: page(() => import('@/pages/public/cart-page')) },
+          { path: 'track-order', lazy: page(() => import('@/pages/orders/track-order-page')) },
           {
             element: (
               <RequireAuth>
                 <Outlet />
               </RequireAuth>
             ),
-            children: [],
+            children: [
+              { path: 'checkout', lazy: page(() => import('@/pages/checkout/checkout-page')) },
+              { path: 'checkout/callback', lazy: page(() => import('@/pages/checkout/payment-callback-page')) },
+              { path: 'track-order/:reference', lazy: page(() => import('@/pages/orders/order-detail-page')) },
+            ],
           },
           { path: '*', element: <NotFoundPage /> },
         ],
