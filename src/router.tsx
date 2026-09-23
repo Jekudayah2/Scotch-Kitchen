@@ -90,6 +90,30 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      // Rider app: mobile-first, its own shell.
+      {
+        path: 'rider',
+        errorElement: <RouteErrorPage />,
+        element: (
+          <RequireRole role="RIDER">
+            <Outlet />
+          </RequireRole>
+        ),
+        children: [
+          {
+            lazy: async () => ({ Component: (await import('@/layouts/rider/rider-layout')).RiderLayout }),
+            children: [
+              { index: true, lazy: page(() => import('@/pages/rider/rider-home-page')) },
+              { path: 'deliveries', lazy: page(() => import('@/pages/rider/rider-deliveries-page')) },
+              { path: 'deliveries/:id', lazy: page(() => import('@/pages/rider/rider-delivery-page')) },
+              { path: 'map', lazy: page(() => import('@/pages/rider/rider-map-page')) },
+              { path: 'history', lazy: page(() => import('@/pages/rider/rider-history-page')) },
+              { path: 'account', lazy: page(() => import('@/pages/rider/rider-account-page')) },
+              { path: '*', element: <NotFoundPage /> },
+            ],
+          },
+        ],
+      },
       // Development-only Paystack stand-in for the QA preview (removed from production builds).
       ...(import.meta.env.DEV && import.meta.env.MODE === 'qa'
         ? [{ path: 'dev/paystack', lazy: page(() => import('@/dev/qa/paystack-simulator-page')) }]
