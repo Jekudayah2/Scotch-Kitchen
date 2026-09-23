@@ -15,6 +15,10 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
   },
+  // PGlite (used only by the dev QA preview) ships its own WASM loader.
+  optimizeDeps: {
+    exclude: ['@electric-sql/pglite'],
+  },
   build: {
     target: 'es2022',
     sourcemap: false,

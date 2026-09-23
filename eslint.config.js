@@ -23,6 +23,11 @@ export default defineConfig([
     },
   },
   {
+    // The development-only QA preview logs its test accounts to the console on purpose.
+    files: ['src/dev/**/*.{ts,tsx}'],
+    rules: { 'no-console': 'off' },
+  },
+  {
     files: ['tests/**/*.ts', 'scripts/**/*.ts', 'vite.config.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: {

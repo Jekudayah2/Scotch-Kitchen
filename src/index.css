@@ -379,7 +379,7 @@
   font-weight: 800;
   font-size: clamp(2.75rem, 1.4rem + 5.6vw, 6rem);
   line-height: 0.94;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.035em;
 }
 
 @utility display-lg {

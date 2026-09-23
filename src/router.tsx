@@ -29,6 +29,11 @@ export const router = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         children: [
           { index: true, lazy: page(() => import('@/pages/public/home-page')) },
+          { path: 'zobopop', lazy: page(() => import('@/pages/public/zobopop-page')) },
+          { path: 'creamypop', lazy: page(() => import('@/pages/public/creamypop-page')) },
+          { path: 'brands/:slug', lazy: page(() => import('@/pages/public/brand-page')) },
+          { path: 'order', lazy: page(() => import('@/pages/public/order-page')) },
+          { path: 'cart', lazy: page(() => import('@/pages/public/cart-page')) },
           {
             element: (
               <RequireAuth>
@@ -40,6 +45,10 @@ export const router = createBrowserRouter([
           { path: '*', element: <NotFoundPage /> },
         ],
       },
+      // Development-only Paystack stand-in for the QA preview (removed from production builds).
+      ...(import.meta.env.DEV && import.meta.env.MODE === 'qa'
+        ? [{ path: 'dev/paystack', lazy: page(() => import('@/dev/qa/paystack-simulator-page')) }]
+        : []),
       {
         element: <AuthLayout />,
         errorElement: <RouteErrorPage />,

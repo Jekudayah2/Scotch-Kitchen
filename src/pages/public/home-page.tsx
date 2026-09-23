@@ -1,20 +1,43 @@
-import { ArrowRight } from 'lucide-react'
-import { Link } from 'react-router'
-import { Button } from '@/components/ui/button'
+import { ErrorState } from '@/components/ui/feedback'
+import { useCatalog } from '@/features/products/queries'
+import {
+  BrandsSection,
+  CreamypopMenuSection,
+  DeliveryInfoSection,
+  GenericBrandSection,
+  HomeHero,
+  HowItWorksPanel,
+  WhySection,
+  ZobopopMenuSection,
+} from '@/features/storefront/home-sections'
 import { useDocumentTitle } from '@/hooks/use-document-title'
 
-/** Phase 1 placeholder; the full storefront homepage replaces this in Phase 2. */
 export default function HomePage() {
   useDocumentTitle(null)
+  const catalog = useCatalog()
+  const brands = catalog.data?.brands ?? []
+  const loading = catalog.isPending
+
   return (
-    <section className="container-page py-20">
-      <p className="eyebrow text-primary-text">SCOTCH’s Kitchen</p>
-      <h1 className="display-xl mt-4 max-w-4xl">
-        Two Ghanaian favourites. <span className="font-serif font-normal italic text-primary-text">One kitchen.</span>
-      </h1>
-      <Button asChild size="lg" className="mt-10" trailingIcon={<ArrowRight aria-hidden="true" />}>
-        <Link to="/order">Order now</Link>
-      </Button>
-    </section>
+    <>
+      <HomeHero brands={brands} loading={loading} />
+      {catalog.isError ? (
+        <ErrorState title="We couldn’t load the menu" error={catalog.error} onRetry={() => void catalog.refetch()} retrying={catalog.isFetching} />
+      ) : (
+        <>
+          <BrandsSection brands={brands} loading={loading} />
+          {brands.map((brand) => {
+            const product = brand.products[0]
+            if (!product) return null
+            if (brand.slug === 'zobopop') return <ZobopopMenuSection key={brand.id} brand={brand} product={product} />
+            if (brand.slug === 'creamypop') return <CreamypopMenuSection key={brand.id} brand={brand} product={product} />
+            return <GenericBrandSection key={brand.id} brand={brand} />
+          })}
+        </>
+      )}
+      <WhySection ingredients={catalog.data?.brandBySlug.get('zobopop')?.products[0]?.ingredients} />
+      <HowItWorksPanel />
+      <DeliveryInfoSection products={catalog.data?.products ?? []} />
+    </>
   )
 }

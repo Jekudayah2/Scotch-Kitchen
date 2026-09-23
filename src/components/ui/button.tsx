@@ -60,9 +60,12 @@ export function Button({
   const classes = cn(base, variants[variant], variant === 'link' ? '' : sizes[size], className)
 
   if (asChild) {
+    // Slottable keeps icons alongside the child's own content (e.g. a router <Link>).
     return (
       <Slot.Root className={classes} {...props}>
-        {children}
+        {leadingIcon}
+        <Slot.Slottable>{children}</Slot.Slottable>
+        {trailingIcon}
       </Slot.Root>
     )
   }

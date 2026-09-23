@@ -1,4 +1,6 @@
 import { Outlet } from 'react-router'
+import { CartButton, CartDrawer, FloatingOrderPill } from '@/features/cart/cart-ui'
+import { AnnouncementBar } from '@/features/storefront/announcement-bar'
 import { MobileBottomNav } from './mobile-bottom-nav'
 import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
@@ -12,12 +14,15 @@ export function PublicLayout() {
       >
         Skip to content
       </a>
-      <SiteHeader />
+      <AnnouncementBar />
+      <SiteHeader cartSlot={<CartButton />} />
       <main id="main" className="flex-1 pb-24 lg:pb-0">
         <Outlet />
       </main>
       <SiteFooter />
       <MobileBottomNav />
+      <FloatingOrderPill />
+      <CartDrawer />
     </div>
   )
 }

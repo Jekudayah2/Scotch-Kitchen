@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router/dom'
 import { Toaster } from 'sonner'
 import { isSupabaseConfigured } from '@/config/env'
 import { AuthProvider } from '@/features/auth/auth-provider'
+import { CartProvider } from '@/features/cart/cart-provider'
 import { ThemeProvider, useTheme } from '@/features/theme/theme-provider'
 import { queryClient } from '@/lib/query-client'
 import { SetupRequiredPage } from '@/pages/system-pages'
@@ -34,8 +35,10 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <RouterProvider router={router} />
-          <ThemedToaster />
+          <CartProvider>
+            <RouterProvider router={router} />
+            <ThemedToaster />
+          </CartProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
