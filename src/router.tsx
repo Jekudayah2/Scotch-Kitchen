@@ -29,8 +29,8 @@ export const router = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         children: [
           { index: true, lazy: page(() => import('@/pages/public/home-page')) },
-          { path: 'zobopop', lazy: page(() => import('@/pages/public/zobopop-page')) },
-          { path: 'creamypop', lazy: page(() => import('@/pages/public/creamypop-page')) },
+          { path: 'zobopop', handle: { scene: 'wine' }, lazy: page(() => import('@/pages/public/zobopop-page')) },
+          { path: 'creamypop', handle: { scene: 'cream' }, lazy: page(() => import('@/pages/public/creamypop-page')) },
           { path: 'brands/:slug', lazy: page(() => import('@/pages/public/brand-page')) },
           { path: 'order', lazy: page(() => import('@/pages/public/order-page')) },
           { path: 'cart', lazy: page(() => import('@/pages/public/cart-page')) },

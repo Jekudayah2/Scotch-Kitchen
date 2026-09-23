@@ -58,12 +58,24 @@ async function settle() {
   await page
     .waitForFunction(() => !document.querySelector('.animate-pulse, [role="status"]'), undefined, { timeout: 15_000 })
     .catch(() => undefined)
-  // Scroll through once so lazy images load before a full-page capture.
+  // Scroll through at reading pace so lazy images load and scroll reveals play
+  // (a reveal only starts once its section has actually been on screen).
   await page.evaluate(async () => {
-    const step = Math.max(400, window.innerHeight * 0.8)
+    const step = Math.max(300, window.innerHeight * 0.55)
     for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
       window.scrollTo(0, y)
-      await new Promise((r) => setTimeout(r, 60))
+      await new Promise((r) => setTimeout(r, 160))
+    }
+    await new Promise((r) => setTimeout(r, 500))
+    // Anything still waiting for its reveal (e.g. it mounted after we scrolled past) gets visited directly.
+    for (let pass = 0; pass < 3; pass++) {
+      const hidden = [...document.querySelectorAll<HTMLElement>('[style*="opacity: 0"]')]
+      if (hidden.length === 0) break
+      for (const el of hidden) {
+        el.scrollIntoView({ block: 'center' })
+        await new Promise((r) => setTimeout(r, 120))
+      }
+      await new Promise((r) => setTimeout(r, 700))
     }
     window.scrollTo(0, 0)
   })

@@ -28,9 +28,9 @@ await ready()
 await page.getByRole('heading', { name: /Order/ }).first().waitFor()
 const zobopop500 = page.locator('article', { hasText: '500ml' }).first()
 await zobopop500.getByRole('button', { name: /Increase/ }).click()
-await zobopop500.getByRole('button', { name: /Add to cart/ }).click()
+await zobopop500.getByRole('button', { name: /^Add / }).click()
 const vanilla = page.locator('article', { hasText: 'Vanilla' }).first()
-await vanilla.getByRole('button', { name: /Add to cart/ }).click()
+await vanilla.getByRole('button', { name: /^Add / }).click()
 await page.waitForTimeout(400)
 const sidebar = await page.locator('aside[aria-label="Your order"]').innerText()
 check('sidebar shows 3 items totalling GH₵38', /3 items/.test(sidebar) && sidebar.includes('GH₵38'))
@@ -63,22 +63,26 @@ await page.waitForTimeout(300)
 await page.screenshot({ path: join(out, 'flow_cart_page.png'), fullPage: true })
 
 // Checkout requires sign-in; the guest cart merges into the account.
-await page.getByRole('button', { name: /Sign in to check out/ }).click()
+await page.getByRole('button', { name: /Sign in to check out/i }).click()
 await page.waitForURL(/\/sign-in/)
 check('checkout redirects guests to sign-in with a return path', page.url().includes('next=%2Fcheckout'))
 await page.fill('input[type="email"]', 'customer@qa.local')
 await page.fill('input[autocomplete="current-password"]', 'Kitchen2026')
 await page.click('button[type="submit"]')
 await page.waitForURL((url) => !url.pathname.startsWith('/sign-in'), { timeout: 20_000 })
-await page.waitForTimeout(1500)
-await page.goto(`${base}/cart`)
-await ready()
-await page.waitForTimeout(1500)
-const serverCart = await page.evaluate(async () => {
-  const db = (globalThis as unknown as { __SK_QA_DB__: { query: (sql: string) => Promise<{ rows: unknown[] }> } }).__SK_QA_DB__
-  const res = await db.query(`select v.sku, c.quantity from public.cart_items c join public.product_variants v on v.id = c.variant_id order by v.sku`)
-  return res.rows
-})
+// Read the account cart in place: the QA database persists to IndexedDB asynchronously,
+// so reloading before it flushes could drop the newest write (a harness artefact).
+const readServerCart = () =>
+  page.evaluate(async () => {
+    const db = (globalThis as unknown as { __SK_QA_DB__: { query: (sql: string) => Promise<{ rows: unknown[] }> } }).__SK_QA_DB__
+    const res = await db.query(`select v.sku, c.quantity from public.cart_items c join public.product_variants v on v.id = c.variant_id order by v.sku`)
+    return res.rows
+  })
+let serverCart: unknown[] = []
+for (let i = 0; i < 25 && serverCart.length < 2; i++) {
+  await page.waitForTimeout(200)
+  serverCart = await readServerCart()
+}
 console.log('server cart rows:', JSON.stringify(serverCart))
 check('guest cart merged into the account cart', JSON.stringify(serverCart) === JSON.stringify([{ sku: 'CP-VAN-200', quantity: 1 }, { sku: 'ZP-500', quantity: 2 }]))
 check('local guest cart cleared after merge', (await page.evaluate(() => localStorage.getItem('sk-cart-v1'))) === null)

@@ -10,7 +10,7 @@ import { useAuth } from '@/features/auth/auth-provider'
 import { fetchMyOrders, orderKeys, trackOrderPublic, type PublicTracking } from '@/features/orders/api'
 import { OrderStatusBadge } from '@/features/orders/components'
 import { isActiveOrder, STATUS_META } from '@/features/orders/status'
-import { SectionHeading } from '@/features/storefront/section-heading'
+import { SectionHeader } from '@/features/storefront/section-header'
 import { useDocumentTitle } from '@/hooks/use-document-title'
 import { LIVE_REFETCH_MS } from '@/hooks/use-realtime'
 import { formatDateTime, formatRelative } from '@/utils/dates'
@@ -149,7 +149,7 @@ export default function TrackOrderPage() {
 
   return (
     <div className="container-page py-10 lg:py-14">
-      <SectionHeading as="h1" eyebrow="Order tracking" title="Track your order" description="Follow your order from the kitchen to your pin." />
+      <SectionHeader as="h1" eyebrow="Order tracking" title="Track your order" description="Follow your order from the kitchen to your pin." />
 
       {status === 'signed_in' && user && (
         <section className="mt-10 space-y-4" aria-labelledby="active-title">

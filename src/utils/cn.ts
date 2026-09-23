@@ -6,11 +6,10 @@ const twMerge = extendTailwindMerge({
   extend: {
     theme: {
       shadow: ['soft', 'lift', 'float'],
-      radius: ['4xl', '5xl'],
+      radius: ['control', 'card', 'media', '4xl', '5xl'],
     },
     classGroups: {
-      'font-family': [{ font: ['sans', 'display', 'serif', 'mono'] }],
-      'font-size': ['display-xl', 'display-lg', 'display-md'],
+      'font-family': [{ font: ['sans', 'display', 'mono'] }],
     },
   },
 })

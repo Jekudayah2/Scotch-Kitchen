@@ -10,8 +10,7 @@ const CATALOG_SELECT = `
   products (
     *,
     product_variants ( * ),
-    product_images ( * ),
-    product_ingredients ( * )
+    product_images ( * )
   )
 `
 

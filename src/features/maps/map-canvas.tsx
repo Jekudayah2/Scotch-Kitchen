@@ -68,7 +68,7 @@ function markerElement(spec: MapMarkerSpec) {
       break
     }
     case 'store': {
-      el.className = 'sk-marker grid size-10 place-items-center rounded-2xl bg-[#1d1816] text-white shadow-lg ring-2 ring-white font-serif italic text-xl'
+      el.className = 'sk-marker grid size-10 place-items-center rounded-2xl bg-[#1d1816] text-white shadow-lg ring-2 ring-white font-display font-extrabold text-lg'
       el.textContent = 'S'
       break
     }

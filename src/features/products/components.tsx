@@ -1,7 +1,7 @@
-import { Check, ImageOff, ShoppingBag } from 'lucide-react'
+import { Check, ShoppingBag } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { BrandTile } from '@/components/brand/brand-marks'
+import { BrandMark } from '@/components/brand/brand-marks'
 import { Badge } from '@/components/ui/badge'
 import { Button, type ButtonProps, type ButtonVariant } from '@/components/ui/button'
 import { useCart } from '@/features/cart/cart-provider'
@@ -11,12 +11,14 @@ import { formatCedis } from '@/utils/money'
 import type { CatalogVariant } from './catalog'
 
 /**
- * Renders official product photography from the database. When no photo has
- * been uploaded yet it shows a branded placeholder, never a fabricated image.
+ * Official product photography from the database (Supabase Storage or the
+ * bundled originals). Without a photo it shows a quiet branded placeholder,
+ * never a fabricated product image.
  */
 export function ProductImage({
   image,
   brandSlug,
+  brandName,
   className,
   imgClassName,
   priority = false,
@@ -24,6 +26,7 @@ export function ProductImage({
 }: {
   image: Pick<ProductImageRow, 'url' | 'alt_text'> | null | undefined
   brandSlug?: string
+  brandName?: string
   className?: string
   imgClassName?: string
   priority?: boolean
@@ -34,11 +37,8 @@ export function ProductImage({
   return (
     <div className={cn('relative overflow-hidden bg-surface-2', className)}>
       {showPlaceholder ? (
-        <div className="absolute inset-0 grid place-items-center">
-          <div className="flex flex-col items-center gap-3 text-ink-3">
-            {brandSlug ? <BrandTile slug={brandSlug} size="sm" /> : <ImageOff className="size-8" aria-hidden="true" />}
-            <span className="text-xs font-semibold">Photo coming soon</span>
-          </div>
+        <div className="absolute inset-0 grid place-items-center" role="img" aria-label={brandName ? `${brandName} photo coming soon` : 'Photo coming soon'}>
+          {brandSlug ? <BrandMark slug={brandSlug} name={brandName ?? brandSlug} /> : null}
         </div>
       ) : (
         <img
@@ -60,6 +60,7 @@ export function Price({ pesewas, className }: { pesewas: number | null | undefin
   return <span className={cn('tabular font-display font-bold tracking-tight', className)}>{formatCedis(pesewas)}</span>
 }
 
+/** Only shown when it matters: sold out, or genuinely low tracked stock. */
 export function StockBadge({ variant }: { variant: CatalogVariant }) {
   if (!variant.orderable) return <Badge tone="neutral">Sold out</Badge>
   if (variant.track_stock && (variant.stock_quantity ?? 0) <= 5) {
@@ -68,11 +69,16 @@ export function StockBadge({ variant }: { variant: CatalogVariant }) {
   return null
 }
 
-/** Adds a variant to the cart with clear, short-lived confirmation. */
+export function containerLabel(productType: CatalogVariant['productType']) {
+  return productType === 'DRINK' ? 'Bottle' : productType === 'FROZEN_DESSERT' ? 'Tub' : 'Each'
+}
+
+/** Adds a variant with immediate, short feedback. The label shows the live total. */
 export function AddToCartButton({
   variant,
   quantity = 1,
   label = 'Add to cart',
+  showTotal = true,
   openCart = false,
   onAdded,
   buttonVariant = 'brand',
@@ -81,9 +87,9 @@ export function AddToCartButton({
   variant: CatalogVariant
   quantity?: number
   label?: string
+  showTotal?: boolean
   openCart?: boolean
   onAdded?: () => void
-  /** Visual style; defaults to the active brand colour (set by the nearest data-brand scope). */
   buttonVariant?: ButtonVariant
 } & Omit<ButtonProps, 'onClick' | 'variant'>) {
   const { add, setDrawerOpen, quantityOf, maxQuantity } = useCart()
@@ -92,8 +98,8 @@ export function AddToCartButton({
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
-  const inCart = quantityOf(variant.id)
-  const atLimit = inCart >= maxQuantity
+  const atLimit = quantityOf(variant.id) >= maxQuantity
+  const total = variant.price_pesewas * quantity
 
   return (
     <Button
@@ -104,73 +110,92 @@ export function AddToCartButton({
         add(variant.id, quantity)
         setJustAdded(true)
         window.clearTimeout(timer.current)
-        timer.current = window.setTimeout(() => setJustAdded(false), 1600)
-        toast.success(`${variant.displayName} added to your cart`, {
-          action: { label: 'View cart', onClick: () => setDrawerOpen(true) },
+        timer.current = window.setTimeout(() => setJustAdded(false), 1500)
+        toast.success(`${quantity} × ${variant.displayName} added`, {
+          action: { label: 'View bag', onClick: () => setDrawerOpen(true) },
+          duration: 2600,
         })
         if (openCart) setDrawerOpen(true)
         onAdded?.()
       }}
       leadingIcon={justAdded ? <Check aria-hidden="true" /> : <ShoppingBag aria-hidden="true" />}
     >
-      {!variant.orderable ? 'Sold out' : atLimit ? 'Limit reached' : justAdded ? 'Added' : label}
+      {!variant.orderable ? (
+        'Sold out'
+      ) : atLimit ? (
+        'Limit reached'
+      ) : justAdded ? (
+        'Added'
+      ) : (
+        <>
+          {label}
+          {showTotal && <span className="tabular opacity-80">· {formatCedis(total)}</span>}
+        </>
+      )}
     </Button>
   )
 }
 
-export function containerLabel(productType: CatalogVariant['productType']) {
-  return productType === 'DRINK' ? 'Bottle' : productType === 'FROZEN_DESSERT' ? 'Tub' : 'Each'
-}
-
-/** Accessible radio-card group for choosing a size or flavour. */
-export function VariantPicker({
+/**
+ * Size or flavour selector as radio cards. The selected option gets a clear
+ * border, stronger text, a check indicator and a little elevation.
+ */
+export function VariantSelector({
   variants,
   value,
   onChange,
   label,
   className,
+  showImages = false,
 }: {
   variants: CatalogVariant[]
   value: string
   onChange: (variantId: string) => void
   label: string
   className?: string
+  showImages?: boolean
 }) {
   return (
-    <fieldset className={cn('space-y-2.5', className)}>
-      <legend className="mb-2.5 text-sm font-semibold text-ink">{label}</legend>
-      <div className="grid grid-cols-2 gap-2.5">
+    <fieldset className={className}>
+      <legend className="mb-3 text-sm font-semibold text-ink-2">{label}</legend>
+      <div className={cn('grid gap-3', variants.length > 1 ? 'grid-cols-2' : 'grid-cols-1')}>
         {variants.map((variant) => {
           const selected = variant.id === value
+          const title = variant.flavour ?? variant.size_label ?? variant.name
+          const detail = variant.flavour ? variant.size_label : containerLabel(variant.productType)
           return (
             <label
               key={variant.id}
               className={cn(
-                'relative flex cursor-pointer flex-col gap-0.5 rounded-2xl border-2 px-4 py-3 transition-colors',
+                'group relative flex cursor-pointer items-center gap-3 rounded-[1rem] border-2 p-3 transition-[border-color,box-shadow,transform,background-color] duration-200',
                 'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring',
-                selected ? 'border-brand bg-brand-soft' : 'border-line bg-surface hover:border-line-strong',
+                selected
+                  ? '-translate-y-0.5 border-brand bg-surface shadow-lift motion-reduce:translate-y-0'
+                  : 'border-line bg-surface/60 hover:border-line-strong',
                 !variant.orderable && 'opacity-60',
               )}
             >
-              <input
-                type="radio"
-                name={label}
-                value={variant.id}
-                checked={selected}
-                onChange={() => onChange(variant.id)}
-                className="sr-only"
-              />
-              <span className="font-display text-lg font-bold text-ink">{variant.flavour ?? variant.size_label ?? variant.name}</span>
-              <span className="flex items-center justify-between gap-2 text-sm text-ink-3">
-                <span>{variant.flavour ? variant.size_label : containerLabel(variant.productType)}</span>
-                <Price pesewas={variant.price_pesewas} className={cn('text-base', selected ? 'text-brand-text' : 'text-ink')} />
-              </span>
-              {!variant.orderable && <span className="text-xs font-semibold text-ink-3">Sold out</span>}
-              {selected && (
-                <span className="absolute top-2.5 right-2.5 grid size-5 place-items-center rounded-full bg-brand text-brand-ink">
-                  <Check className="size-3" strokeWidth={3} aria-hidden="true" />
-                </span>
+              <input type="radio" name={label} value={variant.id} checked={selected} onChange={() => onChange(variant.id)} className="sr-only" />
+              {showImages && (
+                <ProductImage image={variant.image} brandSlug={variant.brand.slug} brandName={variant.brand.name} className="size-10 shrink-0 rounded-[0.7rem] sm:size-14 sm:rounded-[0.8rem]" />
               )}
+              <span className="min-w-0 flex-1">
+                <span className={cn('block truncate font-display text-base leading-tight sm:text-lg', selected ? 'font-extrabold text-ink' : 'font-bold text-ink-2')}>{title}</span>
+                <span className="mt-0.5 flex flex-wrap items-center justify-between gap-x-2 text-sm text-ink-3">
+                  <span className="truncate">{detail}</span>
+                  <Price pesewas={variant.price_pesewas} className={cn('text-[0.95rem]', selected ? 'text-brand-text' : 'text-ink-2')} />
+                </span>
+                {!variant.orderable && <span className="text-xs font-semibold text-ink-3">Sold out</span>}
+              </span>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'absolute -top-2 -right-2 grid size-6 place-items-center rounded-full bg-brand text-brand-ink shadow-soft transition-[opacity,transform] duration-200',
+                  selected ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
+                )}
+              >
+                <Check className="size-3.5" strokeWidth={3} />
+              </span>
             </label>
           )
         })}

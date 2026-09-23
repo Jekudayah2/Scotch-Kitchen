@@ -1,6 +1,6 @@
 import { Compass, RotateCw, ServerCog } from 'lucide-react'
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router'
-import { KitchenLogo, Watermark } from '@/components/brand/brand-marks'
+import { KitchenLogo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { missingEnv } from '@/config/env'
 import { useDocumentTitle } from '@/hooks/use-document-title'
@@ -9,7 +9,9 @@ export function NotFoundPage() {
   useDocumentTitle('Page not found')
   return (
     <section className="container-page relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden py-20 text-center">
-      <Watermark text="404" className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[18rem]" />
+      <p aria-hidden="true" className="display-campaign pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[clamp(10rem,6rem+20vw,20rem)] text-ink/[0.05] select-none">
+        404
+      </p>
       <span className="relative grid size-14 place-items-center rounded-2xl bg-primary-soft text-primary-text">
         <Compass className="size-7" aria-hidden="true" />
       </span>
@@ -19,7 +21,7 @@ export function NotFoundPage() {
       <p className="relative mt-4 max-w-md text-ink-3">The link may be old or mistyped. The menu is still right where you left it.</p>
       <div className="relative mt-8 flex flex-wrap justify-center gap-3">
         <Button asChild>
-          <Link to="/order">Go to the menu</Link>
+          <Link to="/order">Browse Products</Link>
         </Button>
         <Button asChild variant="secondary">
           <Link to="/">Back home</Link>
@@ -46,7 +48,7 @@ export function RouteErrorPage() {
 
   return (
     <section className="container-page flex min-h-dvh flex-col items-center justify-center gap-5 py-20 text-center">
-      <KitchenLogo />
+      <KitchenLogo variant="stacked" label="SCOTCH’s Kitchen" className="h-28" />
       <h1 className="display-md mt-4">{updated ? 'A newer version is available.' : 'Something went wrong.'}</h1>
       <p className="max-w-md text-ink-3">
         {updated ? 'SCOTCH’s Kitchen was just updated. Reload to get the latest version.' : 'Please reload the page. If it keeps happening, try again in a few minutes.'}
@@ -67,7 +69,7 @@ export function RouteErrorPage() {
 export function SetupRequiredPage() {
   return (
     <main className="container-page flex min-h-dvh flex-col items-center justify-center gap-6 py-16 text-center">
-      <KitchenLogo />
+      <KitchenLogo variant="stacked" label="SCOTCH’s Kitchen" className="h-28" />
       <span className="grid size-14 place-items-center rounded-2xl bg-warning-soft text-warning-text">
         <ServerCog className="size-7" aria-hidden="true" />
       </span>

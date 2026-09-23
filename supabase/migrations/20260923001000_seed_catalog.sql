@@ -15,10 +15,10 @@
 insert into public.brands (id, slug, name, tagline, description, theme_key, sort_order)
 values
   ('b1000000-0000-4000-8000-000000000001', 'zobopop', 'ZOBOPOP', 'Premium Hibiscus Drink',
-   'ZOBOPOP is the SCOTCH''s Kitchen hibiscus drink (sobolo): one signature recipe of hibiscus, warm spices and fruit.',
+   'ZOBOPOP is the SCOTCH''s Kitchen premium hibiscus drink: one signature sobolo, refreshingly natural and authentically Ghanaian.',
    'zobopop', 1),
   ('b1000000-0000-4000-8000-000000000002', 'creamypop', 'Creamypop', 'Creamy. Fresh. Ghanaian.',
-   'Creamypop is the SCOTCH''s Kitchen ice cream, made with real milk for a rich and creamy taste.',
+   'Creamypop is the SCOTCH''s Kitchen ice cream: creamy, fresh and Ghanaian, made with real milk for a rich and creamy taste.',
    'creamypop', 2)
 on conflict (id) do nothing;
 
@@ -26,11 +26,11 @@ insert into public.products (id, brand_id, slug, name, subtitle, description, pr
 values
   ('c1000000-0000-4000-8000-000000000001', 'b1000000-0000-4000-8000-000000000001',
    'zobopop-hibiscus-drink', 'ZOBOPOP', 'Premium Hibiscus Drink',
-   'Our signature sobolo. Hibiscus is blended with cloves, ginger, cinnamon and mint, then brightened with mango, lemon and pineapple. It is one recipe, and every bottle carries all of it.',
+   'Our signature sobolo, deep hibiscus red and best enjoyed ice-cold. Refreshing nature in every sip, in two bottle sizes.',
    'DRINK', 'Keep refrigerated', 1),
   ('c1000000-0000-4000-8000-000000000002', 'b1000000-0000-4000-8000-000000000002',
    'creamypop-ice-cream', 'Creamypop Ice Cream', 'Creamy. Fresh. Ghanaian.',
-   'Made with real milk for a rich and creamy taste. Choose Vanilla or Strawberry, each in a 200ml tub.',
+   'Made with real milk for a rich and creamy taste. Vanilla or Strawberry, each in a perfectly portioned 200ml tub.',
    'FROZEN_DESSERT', 'Keep frozen', 2)
 on conflict (id) do nothing;
 
@@ -62,9 +62,7 @@ on conflict (id) do nothing;
 insert into public.product_images (id, product_id, variant_id, url, alt_text, is_primary, sort_order)
 values
   ('e1000000-0000-4000-8000-000000000001', 'c1000000-0000-4000-8000-000000000001', null,
-   '/images/products/zobopop-500ml.webp', 'A bottle of ZOBOPOP premium hibiscus drink beside hibiscus flowers', true, 1),
-  ('e1000000-0000-4000-8000-000000000002', 'c1000000-0000-4000-8000-000000000001', 'd1000000-0000-4000-8000-000000000002',
-   '/images/products/zobopop-500ml.webp', 'A 500ml bottle of ZOBOPOP premium hibiscus drink', true, 1),
+   '/images/products/zobopop-bottle.webp', 'A bottle of ZOBOPOP premium hibiscus drink beside hibiscus flowers', true, 1),
   ('e1000000-0000-4000-8000-000000000003', 'c1000000-0000-4000-8000-000000000002', null,
    '/images/products/creamypop-strawberry.jpg', 'A tub of Creamypop strawberry ice cream', true, 1),
   ('e1000000-0000-4000-8000-000000000004', 'c1000000-0000-4000-8000-000000000002', 'd1000000-0000-4000-8000-000000000003',

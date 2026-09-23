@@ -1,6 +1,6 @@
 import { Check, Minus, Plus } from 'lucide-react'
 import { Checkbox as RadixCheckbox, Switch as RadixSwitch } from 'radix-ui'
-import type { ComponentProps, ReactNode } from 'react'
+import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
 export function Switch({ className, ...props }: ComponentProps<typeof RadixSwitch.Root>) {
@@ -103,8 +103,11 @@ export function SegmentedControl<T extends string>({
   )
 }
 
-/** Integer quantity input that can never produce an invalid value. */
-export function QuantityStepper({
+/**
+ * − 1 + quantity control. Integer only, clamped to [min, max], keyboard
+ * accessible (buttons + a typed value), with a small tick when it changes.
+ */
+export function QuantitySelector({
   value,
   onChange,
   min = 1,
@@ -124,47 +127,73 @@ export function QuantityStepper({
   disabled?: boolean
 }) {
   const clamp = (n: number) => Math.min(max, Math.max(min, Math.trunc(n)))
+  const inputRef = useRef<HTMLInputElement>(null)
+  const stepped = useRef(false)
+
+  // Tactile tick when +/− is pressed (not while typing, and never under reduced motion).
+  useEffect(() => {
+    if (!stepped.current) return
+    stepped.current = false
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    inputRef.current?.animate(
+      [
+        { transform: 'translateY(-35%)', opacity: 0 },
+        { transform: 'translateY(0)', opacity: 1 },
+      ],
+      { duration: 220, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+    )
+  }, [value])
+
+  const step = (delta: number) => {
+    stepped.current = true
+    onChange(clamp(value + delta))
+  }
+
   const button = cn(
-    'grid shrink-0 place-items-center rounded-full text-ink transition-colors hover:bg-surface-3 disabled:opacity-40',
-    'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring',
-    size === 'sm' ? 'size-8' : 'size-10',
+    'grid shrink-0 place-items-center text-ink transition-[background-color,transform] duration-150',
+    'hover:bg-surface-2 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent',
+    'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring motion-reduce:active:scale-100',
+    size === 'sm' ? 'size-10 rounded-[0.6rem]' : 'size-12 rounded-control',
   )
   return (
     <div
-      className={cn('inline-flex items-center gap-1 rounded-full bg-surface-2 p-1 ring-1 ring-line', className)}
+      className={cn('inline-flex items-center rounded-control border border-line-strong bg-surface', disabled && 'opacity-60', className)}
       role="group"
       aria-label={label}
     >
       <button
         type="button"
         className={button}
-        onClick={() => onChange(clamp(value - 1))}
+        onClick={() => step(-1)}
         disabled={disabled || value <= min}
         aria-label={`Decrease ${label}`}
       >
         <Minus className="size-4" aria-hidden="true" />
       </button>
-      <input
-        type="number"
-        inputMode="numeric"
-        min={min}
-        max={max}
-        value={value}
-        disabled={disabled}
-        aria-label={label}
-        onChange={(event) => {
-          const next = Number(event.target.value)
-          if (Number.isFinite(next)) onChange(clamp(next))
-        }}
-        className={cn(
-          'tabular w-9 bg-transparent text-center font-bold text-ink outline-none',
-          size === 'sm' ? 'text-sm' : 'text-base',
-        )}
-      />
+      <span className={cn('relative grid place-items-center overflow-hidden', size === 'sm' ? 'h-10 w-9' : 'h-12 w-11')}>
+        <input
+          ref={inputRef}
+          type="number"
+          inputMode="numeric"
+          min={min}
+          max={max}
+          value={value}
+          disabled={disabled}
+          aria-label={label}
+          onChange={(event) => {
+            const next = Number(event.target.value)
+            if (Number.isFinite(next) && event.target.value !== '') onChange(clamp(next))
+          }}
+          className={cn(
+            'tabular w-full bg-transparent text-center font-bold text-ink outline-none',
+            size === 'sm' ? 'text-sm' : 'text-base',
+          )}
+        />
+      </span>
       <button
         type="button"
         className={button}
-        onClick={() => onChange(clamp(value + 1))}
+        onClick={() => step(1)}
         disabled={disabled || value >= max}
         aria-label={`Increase ${label}`}
       >

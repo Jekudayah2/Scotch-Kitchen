@@ -1,4 +1,5 @@
 import { QueryClientProvider } from '@tanstack/react-query'
+import { domAnimation, LazyMotion, MotionConfig } from 'motion/react'
 import { RouterProvider } from 'react-router/dom'
 import { Toaster } from 'sonner'
 import { isSupabaseConfigured } from '@/config/env'
@@ -36,7 +37,12 @@ export function App() {
       <ThemeProvider>
         <AuthProvider>
           <CartProvider>
-            <RouterProvider router={router} />
+            {/* Lean motion bundle (m.* components only); transforms are dropped for reduced-motion users. */}
+            <LazyMotion features={domAnimation} strict>
+              <MotionConfig reducedMotion="user">
+                <RouterProvider router={router} />
+              </MotionConfig>
+            </LazyMotion>
             <ThemedToaster />
           </CartProvider>
         </AuthProvider>

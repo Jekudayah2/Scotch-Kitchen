@@ -1,4 +1,4 @@
-import type { Brand, Product, ProductImage, ProductIngredient, ProductVariant } from '@/types/domain'
+import type { Brand, Product, ProductImage, ProductVariant } from '@/types/domain'
 
 /**
  * The storefront's single source of truth for names, prices and availability.
@@ -28,7 +28,6 @@ export interface CatalogProduct extends Product {
   variants: CatalogVariant[]
   images: ProductImage[]
   primaryImage: ProductImage | null
-  ingredients: ProductIngredient[]
   /** Lowest price among visible variants, in pesewas. */
   fromPrice: number | null
 }
@@ -52,7 +51,6 @@ export type RawCatalogBrand = Brand & {
     Product & {
       product_variants: ProductVariant[]
       product_images: ProductImage[]
-      product_ingredients: ProductIngredient[]
     }
   >
 }
@@ -85,7 +83,7 @@ export function buildCatalog(rawBrands: RawCatalogBrand[]): Catalog {
     const brandProducts: CatalogProduct[] = []
 
     for (const rawProduct of visibleProducts) {
-      const { product_variants, product_images, product_ingredients, ...productRow } = rawProduct
+      const { product_variants, product_images, ...productRow } = rawProduct
       const images = [...product_images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order)
       const productImages = images.filter((img) => img.variant_id === null)
       const primaryImage = productImages[0] ?? images[0] ?? null
@@ -111,9 +109,6 @@ export function buildCatalog(rawBrands: RawCatalogBrand[]): Catalog {
         variants: productVariants,
         images,
         primaryImage,
-        ingredients: [...product_ingredients].sort(
-          (a, b) => a.ingredient_group.localeCompare(b.ingredient_group) || a.sort_order - b.sort_order,
-        ),
         fromPrice: minPrice(productVariants.map((v) => v.price_pesewas)),
       }
       if (product.variants.length === 0) continue
@@ -138,15 +133,4 @@ export function buildCatalog(rawBrands: RawCatalogBrand[]): Catalog {
     variantById: new Map(variants.map((v) => [v.id, v])),
     brandBySlug: new Map(brands.map((b) => [b.slug, b])),
   }
-}
-
-export type IngredientGroup = ProductIngredient['ingredient_group']
-
-export function groupIngredients(ingredients: ProductIngredient[]) {
-  const groups: Record<string, ProductIngredient[]> = {}
-  for (const ingredient of ingredients) {
-    ;(groups[ingredient.ingredient_group] ??= []).push(ingredient)
-  }
-  for (const list of Object.values(groups)) list.sort(bySortOrder)
-  return groups as Partial<Record<'BASE' | 'SPICE' | 'FRUIT' | 'OTHER', ProductIngredient[]>>
 }
