@@ -51,13 +51,18 @@ secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
 skip_nonce_check = false
 
 # Browser-facing payment functions require a signed-in user's JWT.
+# Every function shares functions/deno.json as its import map; the CLI does not
+# pick up a deno.json at the functions root on its own.
 [functions.paystack-initialize]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.paystack-verify]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 # Paystack calls the webhook without a Supabase JWT; it is authenticated by
 # its HMAC-SHA512 signature instead.
 [functions.paystack-webhook]
 verify_jwt = false
+import_map = "./functions/deno.json"
