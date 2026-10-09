@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-GH">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="SCOTCH's Kitchen: ZOBOPOP premium hibiscus drink and Creamypop ice cream, ordered online and delivered to your exact location." />
+    <meta name="theme-color" content="#faf6f0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta property="og:title" content="SCOTCH's Kitchen" />
+    <meta property="og:description" content="ZOBOPOP premium hibiscus drink and Creamypop ice cream, delivered." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>SCOTCH's Kitchen · ZOBOPOP &amp; Creamypop</title>
+    <script>
+      // Apply the saved (or system) theme before first paint to avoid a flash.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('sk-theme')
+          var dark = stored === 'dark' || ((stored === null || stored === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          if (dark) document.documentElement.classList.add('dark')
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#141011' : '#faf6f0')
+        } catch (e) {}
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>SCOTCH's Kitchen needs JavaScript to take orders. Please enable it and reload.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
